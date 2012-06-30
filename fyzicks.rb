@@ -103,8 +103,7 @@ class Game < Chingu::Window
     super
     self.input = { esc: :exit }
     self.space = CP::Space.new
-    self.substeps = 6
-    Numeric.set_steps self.substeps
+    self.substeps = Numeric.set_steps 6
     self.space.damping = 0.8
 
     100.times{ TechShip.create }
