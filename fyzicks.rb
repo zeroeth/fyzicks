@@ -70,16 +70,20 @@ class TechShip < Chingu::GameObject
     super
     self.image = TileManager.new(file: 'tech_ships.png', sprite_size: 28).random_tile
 
-    mass, moment = 10.0, 150.0
+    mass, moment = (rand*1000.0), 150.0
     self.body = CP::Body.new(mass, moment)
 
     radius, offset = (28/2), CP::Vec2.new(0.0, 0.0)
     self.shape = CP::Shape::Circle.new(body, radius, offset)
 
+    # fling ship in one direction, spinning
     self.shape.body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
     self.shape.body.a = rand * Math::PI * 2
     self.shape.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
-    # apply torque is the one that needs scaling..
+    self.shape.body.w = 10.0.sd
+
+    # fling ship spinning slowly, with thrust being applied
+    # TODO
 
     parent.add_to_space self
   end
