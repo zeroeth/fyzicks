@@ -70,10 +70,10 @@ class TechShip < Chingu::GameObject
     super
     self.image = TileManager.new(file: 'tech_ships.png', sprite_size: 28).random_tile
 
-    mass, moment = (rand*1000.0), 150.0
-    self.body = CP::Body.new(mass, moment)
+    mass, radius, offset = (rand*1000.0), (28/2), CP::Vec2.new(0.0, 0.0)
+    moment = CP.moment_for_circle(mass, 0, radius, offset)
 
-    radius, offset = (28/2), CP::Vec2.new(0.0, 0.0)
+    self.body  = CP::Body.new(mass, moment)
     self.shape = CP::Shape::Circle.new(body, radius, offset)
 
     # fling ship in one direction, spinning
