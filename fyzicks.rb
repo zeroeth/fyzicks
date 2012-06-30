@@ -75,12 +75,13 @@ class TechShip < Chingu::GameObject
 
     self.body  = CP::Body.new(mass, moment)
     self.shape = CP::Shape::Circle.new(body, radius, offset)
+    self.shape.collision_type = :ship
 
     # fling ship in one direction, spinning
-    self.shape.body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
-    self.shape.body.a = rand * Math::PI * 2
-    self.shape.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
-    self.shape.body.w = 10.0.sd
+    self.body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
+    self.body.a = rand * Math::PI * 2
+    #self.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
+    #self.body.w = 10.0.sd
 
     # fling ship spinning slowly, with thrust being applied
     # TODO
@@ -92,24 +93,60 @@ class TechShip < Chingu::GameObject
   def update
     super
 
-    self.angle = @shape.body.a.radians_to_gosu
-    self.x = @shape.body.p.x
-    self.y = @shape.body.p.y
+    self.angle = body.a.radians_to_gosu
+    self.x = body.p.x
+    self.y = body.p.y
+  end
+end
+
+class RedSquare < Chingu::GameObject
+  attr_accessor :shape
+  def setup
+    super
+    self.image = "redsquare.png"
+    self.x = 50
+    self.y = 50
+  end
+
+  def update
+    self.x = parent.floor_body.p.x
+    self.y = parent.floor_body.p.y
+  end
+end
+
+class Dot < Chingu::GameObject
+  def setup
+    super
+    self.image = "whitecircle.png"
   end
 end
 
 
-
 class Game < Chingu::Window
-  attr_accessor :space, :substeps
+  attr_accessor :space, :substeps, :floor_body, :floor_shape
 
   def setup
     super
     self.input = { esc: :exit }
     self.space = CP::Space.new
     self.substeps = Numeric.set_steps 6
-    self.space.damping = 0.8
+    #self.space.damping = 0.8
+    self.space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
+=begin
+    self.space.add_collision_func(:ship, :floor) do |ship_shape, floor_shape|
+      game_objects.each do |obj|
+        if obj.shape == ship_shape
+          obj.image = "whitecircle.png"
+          space.remove_body obj.body
+          space.remove_shape obj.shape
+        end
+      end
+    end
+=end
+
+    add_floor
+    #RedSquare.create
     100.times{ TechShip.create }
   end
 
@@ -126,6 +163,20 @@ class Game < Chingu::Window
   def add_to_space game_object
     self.space.add_body  game_object.body
     self.space.add_shape game_object.shape
+  end
+
+  def add_floor
+    self.floor_body = CP::Body.new CP::INFINITY, CP::INFINITY
+    floor_body.p = CP::Vec2.new($window.width/2, $window.height-200)
+
+    # relative to body position
+    left = CP::Vec2.new(0, -100)
+    right = CP::Vec2.new(0, 100)
+
+    self.floor_shape = CP::Shape::Segment.new(floor_body, left, right, 10)
+    floor_shape.collision_type = :ship
+
+    self.space.add_static_shape floor_shape
   end
 end
 
