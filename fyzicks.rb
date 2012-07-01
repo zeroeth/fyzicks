@@ -75,13 +75,16 @@ class TechShip < Chingu::GameObject
 
     self.body  = CP::Body.new(mass, moment)
     self.shape = CP::Shape::Circle.new(body, radius, offset)
+    self.shape.object = self
     self.shape.collision_type = :ship
+    self.shape.e = 0.0
+    self.shape.u = 0.8
 
     # fling ship in one direction, spinning
     self.body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
     self.body.a = rand * Math::PI * 2
-    #self.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
-    #self.body.w = 10.0.sd
+    self.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
+    self.body.w = 10.0.sd
 
     # fling ship spinning slowly, with thrust being applied
     # TODO
@@ -104,13 +107,14 @@ class RedSquare < Chingu::GameObject
   def setup
     super
     self.image = "redsquare.png"
-    self.x = 50
-    self.y = 50
   end
 
   def update
-    self.x = parent.floor_body.p.x
-    self.y = parent.floor_body.p.y
+    super
+
+    self.angle = parent.floor_body.a.radians_to_gosu
+    self.x     = parent.floor_body.p.x
+    self.y     = parent.floor_body.p.y
   end
 end
 
@@ -129,8 +133,8 @@ class Game < Chingu::Window
     super
     self.input = { esc: :exit }
     self.space = CP::Space.new
-    self.substeps = Numeric.set_steps 6
-    #self.space.damping = 0.8
+    self.substeps = Numeric.set_steps 30
+    self.space.damping = 0.8
     self.space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
 =begin
@@ -146,7 +150,7 @@ class Game < Chingu::Window
 =end
 
     add_floor
-    #RedSquare.create
+    RedSquare.create
     100.times{ TechShip.create }
   end
 
@@ -167,16 +171,16 @@ class Game < Chingu::Window
 
   def add_floor
     self.floor_body = CP::Body.new CP::INFINITY, CP::INFINITY
-    floor_body.p = CP::Vec2.new($window.width/2, $window.height-200)
+    floor_body.p = CP::Vec2.new($window.width/2, $window.height/2)
+    floor_body.a = 0
 
-    # relative to body position
-    left = CP::Vec2.new(0, -100)
-    right = CP::Vec2.new(0, 100)
+    self.floor_shape = CP::Shape::Circle.new(floor_body, 100, CP::Vec2.new(0,0))
+    self.floor_shape.collision_type = :ship
+    self.floor_shape.u = 1
+    self.floor_shape.e = 1
 
-    self.floor_shape = CP::Shape::Segment.new(floor_body, left, right, 10)
-    floor_shape.collision_type = :ship
-
-    self.space.add_static_shape floor_shape
+    self.space.add_body floor_body
+    self.space.add_shape floor_shape
   end
 end
 
