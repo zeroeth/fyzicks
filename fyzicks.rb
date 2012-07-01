@@ -4,29 +4,6 @@ require 'chingu'
 require 'chipmunk'
 
 
-module Chingu
-  module Traits
-    module Awesome
-      def setup_trait options
-        super
-        self.x = rand $window.width
-        self.y = rand $window.height
-        self.velocity_y = -(rand(20)+1)
-      end
-
-
-      def update_trait
-        super
-        if self.y < 0
-          self.y = $window.height
-        end
-      end
-    end
-  end
-end
-
-
-
 class Numeric
   def radians_to_vec2
     CP::Vec2.new(Math::cos(self), Math::sin(self))
