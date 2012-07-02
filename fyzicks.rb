@@ -143,7 +143,7 @@ class Game < Chingu::Window
 
     self.floor_shape = CP::Shape::Circle.new(floor_body, 100, CP::Vec2.new(0,0))
 
-    self.space.add_shape floor_shape
+    self.space.add_static_shape floor_shape
   end
 end
 
