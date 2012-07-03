@@ -90,8 +90,8 @@ class TechShip < PhysicalObject
     # fling ship in one direction, spinning
     body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
     body.a = rand * Math::PI * 2
-    #body.v = self.shape.body.a.radians_to_vec2 * (rand * 200.0)
-    body.w = 10 # rotational velocity
+    body.v = self.shape.body.a.radians_to_vec2 * (rand * 200.0)
+    body.w = 0.0 # rotational velocity
 
     # fling ship spinning slowly, with thrust being applied
     # TODO
@@ -110,15 +110,18 @@ class Wall < PhysicalObject
     self.body = CP::StaticBody.new
     body.p = CP::Vec2.new($window.width/2, $window.height/2)
     body.a = 0.0
-    body.w = 0
 
-    shape_array = [[0.0, 0.0], [0.0, 200.0], [200.0, 200.0], [200.0, 0.0]].to_vec2_list
-    self.shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(-100.0,-100.0))
+    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
+    self.shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(-16.0,-160.0))
 
     shape.e = 0.0
     shape.u = 1.0
 
     parent.add_static self
+  end
+
+  def draw
+    @image.draw_rot(@shape.body.p.x, @shape.body.p.y, 1, @shape.body.a.radians_to_gosu - 90)
   end
 end
 
@@ -145,7 +148,8 @@ class Game < Chingu::Window
     space.damping = 0.8
     #space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
-    Wall.create
+    walls = 2.times.collect{ Wall.create }
+    walls.each {|w| w.location = [rand($window.height), rand($window.width)]; w.body.a = (rand * Math::PI * 2) }
     1000.times{ TechShip.create }
   end
 
@@ -157,7 +161,7 @@ class Game < Chingu::Window
       self.space.step((1.0/60.0).sd)
     end
 
-    #self.space.rehash_static
+    self.space.rehash_static
   end
 
 
