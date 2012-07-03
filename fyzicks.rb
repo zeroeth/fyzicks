@@ -52,15 +52,16 @@ class TechShip < Chingu::GameObject
 
     self.body  = CP::Body.new(mass, moment)
     self.shape = CP::Shape::Circle.new(body, radius, offset)
-    self.shape.object = self # access to chingu object from chipmunk collisions
-    self.shape.e = 0.0 # elasticity
-    self.shape.u = 0.8 # friction
+
+    shape.object = self # access to chingu object from chipmunk collisions
+    shape.e = 0.0 # elasticity
+    shape.u = 0.8 # friction
 
     # fling ship in one direction, spinning
-    self.body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
-    self.body.a = rand * Math::PI * 2
-    self.body.v =  self.shape.body.a.radians_to_vec2 * (rand * 200.0)
-    self.body.w = 10.0.sd # rotational velocity
+    body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
+    body.a = rand * Math::PI * 2
+    body.v = self.shape.body.a.radians_to_vec2 * (rand * 200.0)
+    body.w = 10 # rotational velocity
 
     # fling ship spinning slowly, with thrust being applied
     # TODO
@@ -114,8 +115,9 @@ class Game < Chingu::Window
     self.input = { esc: :exit }
     self.space = CP::Space.new
     self.substeps = Numeric.set_steps 30
-    self.space.damping = 0.8
-    self.space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
+
+    space.damping = 0.8
+    space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
     add_floor
     RedSquare.create
@@ -133,17 +135,19 @@ class Game < Chingu::Window
 
 
   def add_to_space game_object
-    self.space.add_body  game_object.body
-    self.space.add_shape game_object.shape
+    space.add_body  game_object.body
+    space.add_shape game_object.shape
   end
 
   def add_floor
     self.floor_body = CP::StaticBody.new
-    self.floor_body.p = CP::Vec2.new($window.width/2, $window.height/2)
+    floor_body.p = CP::Vec2.new($window.width/2, $window.height/2)
 
     self.floor_shape = CP::Shape::Circle.new(floor_body, 100, CP::Vec2.new(0,0))
+    floor_shape.e = 0.0
+    floor_shape.u = 1.0
 
-    self.space.add_static_shape floor_shape
+    space.add_static_shape floor_shape
   end
 end
 
