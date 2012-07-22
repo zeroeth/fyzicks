@@ -165,19 +165,13 @@ class Game < Chingu::Window
     space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
     # try pinning next
-    walls = 2.times.collect{ Wall.create }
-    #walls.each  do |w|
-    #  w.location = [rand($window.height), rand($window.width)]
-    #  w.body.a = (rand * Math::PI * 2)
-    #end
+    walls = 5.times.collect{ Wall.create }
+    walls.each  do |w|
+      w.location = [rand($window.height), rand($window.width)]
+      w.body.a = (rand * Math::PI * 2)
+    end
 
-    walls[0].location = [200, 400]
-    walls[0].body.a = Math::PI/180.0 * -35
-
-    walls[1].location = [$window.width-200, 400]
-    walls[1].body.a = Math::PI/180.0 * 35
-
-    1000.times{ TechShip.create }
+    500.times{ TechShip.create }
   end
 
 
