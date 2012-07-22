@@ -127,7 +127,7 @@ class Wall < PhysicalObject
   end
 
   def draw
-    @image.draw_rot(@shape.body.p.x, @shape.body.p.y, 1, @shape.body.a.radians_to_gosu - 90)
+    @image.draw_rot(@shape.body.p.x, @shape.body.p.y, 1, @shape.body.a.radians_to_gosu)
   end
 
 
@@ -164,9 +164,20 @@ class Game < Chingu::Window
     space.damping = 0.8
     space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
-    walls = 5.times.collect{ PinnedWall.create }
-    walls.each {|w| w.location = [rand($window.height), rand($window.width)];} #w.body.a = (rand * Math::PI * 2) }
-    100.times{ TechShip.create }
+    # try pinning next
+    walls = 2.times.collect{ Wall.create }
+    #walls.each  do |w|
+    #  w.location = [rand($window.height), rand($window.width)]
+    #  w.body.a = (rand * Math::PI * 2)
+    #end
+
+    walls[0].location = [200, 400]
+    walls[0].body.a = Math::PI/180.0 * -35
+
+    walls[1].location = [$window.width-200, 400]
+    walls[1].body.a = Math::PI/180.0 * 35
+
+    1000.times{ TechShip.create }
   end
 
 
