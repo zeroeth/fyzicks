@@ -22,6 +22,8 @@ OSX llvm might give you trouble, like shrinking/exploding polygons as they rotat
     export CC=gcc-4.2
     export CXX=g++-4.2
 
+Ubuntu 12.04 had an error about libiconv_open missing from gosu.so. If you go into the gem folder, edit the Makefile to include -liconv it works.
+
 Notes
 -----
 
