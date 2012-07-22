@@ -14,6 +14,7 @@ class Numeric
     @@substeps = value
   end
 
+
   def sd
     self/@@substeps
   end
@@ -68,6 +69,11 @@ class PhysicalObject < Chingu::GameObject
   def location=(values)
     body.p.x, body.p.y = values
   end
+
+
+  def add_to_space
+    parent.add_to_space self
+  end
 end
 
 
@@ -96,7 +102,7 @@ class TechShip < PhysicalObject
     # fling ship spinning slowly, with thrust being applied
     # TODO
 
-    parent.add_to_space self
+    add_to_space
   end
 end
 
@@ -117,15 +123,25 @@ class Wall < PhysicalObject
     shape.e = 0.0
     shape.u = 1.0
 
-    parent.add_static self
+    add_to_space
   end
 
   def draw
     @image.draw_rot(@shape.body.p.x, @shape.body.p.y, 1, @shape.body.a.radians_to_gosu - 90)
   end
+
+
+  def add_to_space
+    parent.add_static self
+  end
 end
 
 
+class PinnedWall < Wall
+  def add_to_space
+    parent.add_to_space self
+  end
+end
 
 class Dot < Chingu::GameObject
   def setup
@@ -146,11 +162,11 @@ class Game < Chingu::Window
     self.substeps = Numeric.set_steps 10
 
     space.damping = 0.8
-    #space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
+    space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
-    walls = 2.times.collect{ Wall.create }
-    walls.each {|w| w.location = [rand($window.height), rand($window.width)]; w.body.a = (rand * Math::PI * 2) }
-    1000.times{ TechShip.create }
+    walls = 5.times.collect{ PinnedWall.create }
+    walls.each {|w| w.location = [rand($window.height), rand($window.width)];} #w.body.a = (rand * Math::PI * 2) }
+    100.times{ TechShip.create }
   end
 
 
