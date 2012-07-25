@@ -188,8 +188,7 @@ class PinnedWall < PhysicalObject
 
   def add_to_space
     parent.add_to_space self
-    #parent.space.add_body self.rotation_body
-    parent.space.add_constraint self.pin_joint
+    parent.add_constraint self.pin_joint
   end
 end
 
@@ -252,6 +251,10 @@ class Game < Chingu::Window
 
   def add_static game_object
     space.add_static_shape game_object.shape
+  end
+
+  def add_constraint constraint
+    space.add_constraint constraint
   end
 
 
