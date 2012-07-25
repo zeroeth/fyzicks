@@ -258,6 +258,11 @@ class Game < Chingu::Window
   end
 
 
+  def add_constraint constraint
+    space.add_constraint constraint
+  end
+
+
   def spawn_ship
     ship = TechShip.create
     ship.location = mouse_x, mouse_y
