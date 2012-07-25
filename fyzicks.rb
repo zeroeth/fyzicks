@@ -83,7 +83,7 @@ class TechShip < PhysicalObject
     super
     self.image = TileManager.new(file: 'tech_ships.png', sprite_size: 28).random_tile
 
-    mass, radius, offset = (rand*1000.0), (28/2), CP::Vec2.new(0.0, 0.0)
+    mass, radius, offset = (rand*1000.0), (28/2), [0.0, 0.0].to_vec2
     moment = CP.moment_for_circle(mass, 0, radius, offset)
 
     self.body  = CP::Body.new(mass, moment)
@@ -94,12 +94,12 @@ class TechShip < PhysicalObject
     shape.u = 0.8 # friction
 
     # fling ship in one direction, spinning
-    body.p = CP::Vec2.new(rand * $window.width, rand * $window.height)
+    body.p = [rand * $window.width, rand * $window.height].to_vec2
     body.a = rand * Math::PI * 2
     body.v = self.shape.body.a.radians_to_vec2 * (rand * 200.0)
     body.w = 0.0 # rotational velocity
 
-    # fling ship spinning slowly, with thrust being applied
+    # fling ship spinning slowly, with thrust being applied (a slow arc)
     # TODO
 
     add_to_space
@@ -108,26 +108,44 @@ end
 
 
 
-class Wall < PhysicalObject
+class Block < PhysicalObject
   def setup
     super
-    self.image = "metroid_wall.png"
+    self.image = "metroid_block.png"
 
-    self.body = CP::StaticBody.new
-    body.p = CP::Vec2.new($window.width/2, $window.height/2)
+    shape_array = [[0.0, 0.0], [0.0, 32.0], [32.0, 32.0], [32.0, 0.0]].to_vec2_list
+
+    mass = rand * 10000.0
+    moment = CP.moment_for_poly mass, shape_array, [0.0, 0,0].to_vec2
+    self.body = CP::Body.new mass, moment
+    body.p = [$window.width/2, $window.height/2].to_vec2
     body.a = 0.0
 
-    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
-    self.shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(-16.0,-160.0))
+    self.shape = CP::Shape::Poly.new(body, shape_array, [-16.0,-16.0].to_vec2)
 
     shape.e = 0.0
     shape.u = 1.0
 
     add_to_space
   end
+end
 
-  def draw
-    @image.draw_rot(@shape.body.p.x, @shape.body.p.y, 1, @shape.body.a.radians_to_gosu)
+class StaticWall < PhysicalObject
+  def setup
+    super
+    self.image = "metroid_wall.png"
+
+    self.body = CP::StaticBody.new
+    body.p = [$window.width/2, $window.height/2].to_vec2
+    body.a = 0.0
+
+    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
+    self.shape = CP::Shape::Poly.new(body, shape_array, [-16.0,-160.0].to_vec2)
+
+    shape.e = 0.0
+    shape.u = 1.0
+
+    add_to_space
   end
 
 
@@ -137,9 +155,39 @@ class Wall < PhysicalObject
 end
 
 
-class PinnedWall < Wall
+class PinnedWall < PhysicalObject
+  attr_accessor :rotation_body, :pin_joint
+  def setup
+    super
+
+    self.image = "metroid_wall.png"
+
+    center_point = [$window.width/2, $window.height/2].to_vec2
+
+    self.body = CP::Body.new 10000, 100000
+    body.p = center_point
+    body.a = 0.0
+
+    self.rotation_body = CP::StaticBody.new
+    #rotation_body.p = center_point
+    #rotation_body.a = 0.0
+
+    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
+    self.shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(-16.0,-160.0))
+
+    shape.e = 0.0
+    shape.u = 1.0
+
+    self.pin_joint = CP::Constraint::PinJoint.new body, rotation_body, [0,0].to_vec2, center_point
+
+    add_to_space
+  end
+
+
   def add_to_space
     parent.add_to_space self
+    #parent.space.add_body self.rotation_body
+    parent.space.add_constraint self.pin_joint
   end
 end
 
@@ -165,13 +213,21 @@ class Game < Chingu::Window
     space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
     # try pinning next
-    walls = 5.times.collect{ Wall.create }
+    walls = 5.times.collect{ StaticWall.create }
     walls.each  do |w|
       w.location = [rand($window.height), rand($window.width)]
       w.body.a = (rand * Math::PI * 2)
     end
 
-    500.times{ TechShip.create }
+    #PinnedWall.create
+
+    blocks = 50.times.collect{ Block.create }
+    blocks.each  do |w|
+      w.location = [rand($window.height), rand($window.width)]
+      w.body.a = (rand * Math::PI * 2)
+    end
+
+    50.times{ TechShip.create }
   end
 
 
