@@ -164,19 +164,21 @@ class PinnedWall < PhysicalObject
 
     center_point = [$window.width/2, $window.height/2].to_vec2
 
-    self.body = CP::Body.new 10000, 100000
+    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
+
+    mass = 10000.0
+    moment = CP.moment_for_poly mass, shape_array, [0.0, 0,0].to_vec2
+    self.body = CP::Body.new mass, moment
     body.p = center_point
     body.a = 0.0
 
-    self.rotation_body = CP::StaticBody.new
-    #rotation_body.p = center_point
-    #rotation_body.a = 0.0
-
-    shape_array = [[0.0, 0.0], [0.0, 320.0], [32.0, 320.0], [32.0, 0.0]].to_vec2_list
     self.shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(-16.0,-160.0))
 
     shape.e = 0.0
     shape.u = 1.0
+
+    # giving this position doesnt work
+    self.rotation_body = CP::StaticBody.new
 
     self.pin_joint = CP::Constraint::PinJoint.new body, rotation_body, [0,0].to_vec2, center_point
 
@@ -213,13 +215,13 @@ class Game < Chingu::Window
     space.gravity = (Math::PI/2.0).radians_to_vec2 * 100
 
     # try pinning next
-    walls = 5.times.collect{ StaticWall.create }
+    walls = 2.times.collect{ StaticWall.create }
     walls.each  do |w|
       w.location = [rand($window.height), rand($window.width)]
       w.body.a = (rand * Math::PI * 2)
     end
 
-    #PinnedWall.create
+    PinnedWall.create
 
     blocks = 50.times.collect{ Block.create }
     blocks.each  do |w|
