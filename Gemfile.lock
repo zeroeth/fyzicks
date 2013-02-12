@@ -1,6 +1,8 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    ashton (0.0.1alpha)
+      opengl (~> 0.8.0.pre1)
     chingu (0.9rc8)
       gosu (>= 0.7.43)
       gosu (>= 0.7.43)
@@ -13,11 +15,13 @@ GEM
       ffi (~> 1.0.11)
       gosu (~> 0.7.41)
     gosu (0.7.43)
+    opengl (0.8.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  ashton
   chingu
   chipmunk
   fidgit
